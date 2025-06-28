@@ -1,28 +1,45 @@
 {
   description = "Tuisic";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    flake-utils.url = "github:numtide/flake-utils";
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
   };
 
-  outputs = { nixpkgs, rust-overlay, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            openssl
-            pkg-config
-            rust-bin.beta.latest.default
-          ];
-        };
-      }
-    );
+  inputs = {
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+  };
+
+  outputs = { fenix, nixpkgs, ... }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ fenix.overlays.default ];
+      };
+    in
+    {
+      packages.${system}.default = fenix.packages.${system}.minimal.toolchain;
+
+      devShells.${system}.default = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          (fenix.packages.${system}.complete.withComponents [
+            "cargo"
+            "clippy"
+            "rust-src"
+            "rustc"
+            "rustfmt"
+          ])
+          rust-analyzer-nightly
+        ];
+      };
+    };
 }
