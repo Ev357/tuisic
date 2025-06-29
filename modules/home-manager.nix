@@ -1,16 +1,9 @@
-{ inputs, ... }:
-
 {
   flake.homeManagerModules.default = { config, pkgs, lib, ... }:
     let
       cfg = config.programs.tuisic;
     in
     {
-      _module.args.pkgs = import inputs.nixpkgs {
-        inherit (pkgs) system;
-        overlays = [ inputs.fenix.overlays.default ];
-      };
-
       options.programs.tuisic = {
         enable = lib.mkEnableOption "tuisic music player";
 
