@@ -1,14 +1,13 @@
-use crate::file_item::FileItem;
 use ratatui::widgets::ListState;
 
 pub struct FileList {
-    pub items: Vec<FileItem>,
+    pub items: Vec<String>,
     pub state: ListState,
 }
 
 impl FromIterator<String> for FileList {
     fn from_iter<I: IntoIterator<Item = String>>(iter: I) -> Self {
-        let items = iter.into_iter().map(|s| FileItem::new(&s)).collect();
+        let items = iter.into_iter().collect();
         let mut state = ListState::default();
         state.select_first();
         Self { items, state }
@@ -16,8 +15,8 @@ impl FromIterator<String> for FileList {
 }
 
 impl FileList {
-    pub fn selected_item(&self) -> Option<&FileItem> {
-        self.state.selected().map(|i| &self.items[i])
+    pub fn selected_item(&self) -> Option<String> {
+        self.state.selected().map(|i| &self.items[i]).cloned()
     }
 
     pub fn select_next(&mut self) {
