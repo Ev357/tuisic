@@ -1,3 +1,7 @@
+{ config, ... }:
+let
+  tuisic = config.programs.tuisic;
+in
 {
   flake.homeManagerModules.default = { config, pkgs, lib, ... }:
     let
@@ -9,7 +13,7 @@
 
         package = lib.mkOption {
           type = lib.types.package;
-          default = config.packages.tuisic;
+          default = tuisic;
           description = "The package to use";
         };
 
