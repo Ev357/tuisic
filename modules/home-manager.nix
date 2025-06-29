@@ -1,7 +1,7 @@
 { config, ... }:
 
 let
-  tuisic = config.programs.tuisic;
+  tuisic = config.packages.tuisic;
 in
 {
   flake.homeManagerModules.default = { config, pkgs, lib, ... }:
