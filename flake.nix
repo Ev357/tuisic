@@ -11,35 +11,27 @@
   };
 
   inputs = {
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "nixpkgs/nixos-unstable";
   };
 
-  outputs = { fenix, nixpkgs, ... }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [ fenix.overlays.default ];
-      };
-    in
-    {
-      packages.${system}.default = fenix.packages.${system}.minimal.toolchain;
+  outputs = { nixpkgs, flake-parts, fenix, ... }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      imports = [
+        ./modules
+        ./pkgs
+      ];
 
-      devShells.${system}.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          (fenix.packages.${system}.complete.withComponents [
-            "cargo"
-            "clippy"
-            "rust-src"
-            "rustc"
-            "rustfmt"
-          ])
-          rust-analyzer-nightly
-        ];
+      perSystem = { system, ... }: {
+        _module.args.pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ fenix.overlays.default ];
+        };
       };
     };
 }

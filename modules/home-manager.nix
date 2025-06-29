@@ -1,0 +1,48 @@
+{ inputs, ... }:
+
+{
+  flake.homeManagerModules.default = { config, pkgs, lib, ... }:
+    let
+      cfg = config.programs.tuisic;
+    in
+    {
+      _module.args.pkgs = import inputs.nixpkgs {
+        inherit (pkgs) system;
+        overlays = [ inputs.fenix.overlays.default ];
+      };
+
+      options.programs.tuisic = {
+        enable = lib.mkEnableOption "tuisic music player";
+
+        package = lib.mkOption {
+          type = lib.types.package;
+          default = config.packages.tuisic;
+          description = "The package to use";
+        };
+
+        configFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "Path to a custom configuration file";
+        };
+
+        settings = lib.mkOption {
+          type = lib.types.attrs;
+          default = { };
+          description = "Settings";
+        };
+      };
+
+      config = pkgs.lib.mkIf config.myRustProject.enable {
+        home.packages = [ cfg.package ];
+
+        xdg.configFile."tuisic/config.toml" = lib.mkIf (cfg.configFile != null || cfg.settings != { }) (
+          if cfg.configFile != null then {
+            source = cfg.configFile;
+          } else {
+            text = lib.generators.toTOML { } cfg.settings;
+          }
+        );
+      };
+    };
+}
