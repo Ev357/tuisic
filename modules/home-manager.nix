@@ -37,7 +37,7 @@
           if cfg.configFile != null then {
             source = cfg.configFile;
           } else {
-            text = builtins.toTOML cfg.settings;
+            source = (pkgs.formats.toml { }).generate "config" cfg.settings;
           }
         );
       };
