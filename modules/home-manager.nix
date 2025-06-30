@@ -31,7 +31,7 @@ in
         };
       };
 
-      config = pkgs.lib.mkIf cfg.enable {
+      config = lib.mkIf cfg.enable {
         # home.packages = [ cfg.package ];
 
         xdg.configFile."tuisic/config.toml" = lib.mkIf (cfg.configFile != null || cfg.settings != { }) (
