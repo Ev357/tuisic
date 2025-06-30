@@ -37,7 +37,7 @@
           if cfg.configFile != null then {
             source = cfg.configFile;
           } else {
-            text = lib.generators.toTOML { } cfg.settings;
+            text = builtins.toTOML cfg.settings;
           }
         );
       };
