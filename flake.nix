@@ -19,19 +19,13 @@
     };
   };
 
-  outputs = { nixpkgs, flake-parts, fenix, ... }@inputs:
+  outputs = { flake-parts, ... }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" ];
       imports = [
         ./modules
         ./pkgs
       ];
 
-      perSystem = { system, ... }: {
-        _module.args.pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ fenix.overlays.default ];
-        };
-      };
+      systems = [ "x86_64-linux" "aarch64-linux" ];
     };
 }
