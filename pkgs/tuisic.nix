@@ -15,7 +15,7 @@ in
   cargoLock.lockFile = ../Cargo.lock;
 
   meta = {
-    description = "Tuisic music player";
+    description = "A terminal music player";
     homepage = "https://github.com/Ev357/tuisic";
     license = lib.licenses.mit;
     maintainers = [ lib.maintainers.ev357 ];
