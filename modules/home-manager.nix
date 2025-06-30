@@ -1,7 +1,7 @@
 { pkgs, inputs, ... }:
 
 let
-  tuisic = pkgs.callPackage ../pkgs/tuisic.nix { inherit inputs; };
+  # tuisic = pkgs.callPackage ../pkgs/tuisic.nix { inherit inputs; };
 in
 {
   flake.homeManagerModules.default = { config, pkgs, lib, ... }:
@@ -12,11 +12,11 @@ in
       options.programs.tuisic = {
         enable = lib.mkEnableOption "tuisic music player";
 
-        package = lib.mkOption {
-          type = lib.types.package;
-          default = tuisic;
-          description = "The package to use";
-        };
+        # package = lib.mkOption {
+        #   type = lib.types.package;
+        #   default = tuisic;
+        #   description = "The package to use";
+        # };
 
         configFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
@@ -32,7 +32,7 @@ in
       };
 
       config = pkgs.lib.mkIf cfg.enable {
-        home.packages = [ cfg.package ];
+        # home.packages = [ cfg.package ];
 
         xdg.configFile."tuisic/config.toml" = lib.mkIf (cfg.configFile != null || cfg.settings != { }) (
           if cfg.configFile != null then {
