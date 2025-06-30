@@ -4,7 +4,7 @@ let
   tuisic = pkgs.callPackage ../pkgs/tuisic.nix { inherit lib inputs pkgs system; };
 in
 {
-  flake.homeManagerModules.default = { config, lib, ... }:
+  flake.homeManagerModules.default = { config, pkgs, lib, ... }:
     let
       cfg = config.programs.tuisic;
     in
