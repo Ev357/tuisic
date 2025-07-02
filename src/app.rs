@@ -1,4 +1,7 @@
-use std::sync::{Arc, RwLock};
+use std::{
+    env,
+    sync::{Arc, RwLock},
+};
 
 use color_eyre::Result;
 
@@ -41,7 +44,12 @@ impl App {
     }
 
     fn load_config() -> Result<Arc<RwLock<Config>>> {
-        let config = Config::from_file("~/.config/tuisic/config.toml")?;
+        let home_path = env::home_dir().unwrap();
+
+        let config = Config::from_file(&format!(
+            "{}/.config/tuisic/config.toml",
+            home_path.display()
+        ))?;
 
         Ok(Arc::new(RwLock::new(config)))
     }
