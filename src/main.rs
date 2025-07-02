@@ -1,24 +1,25 @@
 mod app;
-mod file_list;
-mod file_utils;
+mod config;
+mod providers;
+mod song;
+mod song_list;
 
-use app::App;
+use color_eyre::Result;
 
-use crate::app::AppEvent;
+use app::{App, AppEvent};
 
-fn main() -> color_eyre::Result<()> {
+fn main() -> Result<()> {
     color_eyre::install()?;
     let terminal = ratatui::init();
 
-    let files = file_utils::get_files()?;
-    let app_result = App::new(files).run(terminal)?;
+    let app_result = App::new()?.run(terminal)?;
 
     ratatui::restore();
 
-    if let AppEvent::Select(selected) = app_result {
-        println!("Selected: {selected}");
+    if let AppEvent::Select { song } = app_result {
+        println!("Selected: {}", song.title);
     } else {
-        println!("No file selected");
+        println!("No song selected");
     }
 
     Ok(())
