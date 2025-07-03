@@ -6,10 +6,11 @@ use std::{
 use color_eyre::Result;
 
 use ratatui::{
-    DefaultTerminal,
+    Terminal,
     buffer::Buffer,
     crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     layout::Rect,
+    prelude::Backend,
     text::Line,
     widgets::{HighlightSpacing, List, ListItem, StatefulWidget, Widget},
 };
@@ -76,7 +77,7 @@ impl App {
             .collect()
     }
 
-    pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<AppEvent> {
+    pub fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<AppEvent> {
         let mut should_exit = false;
 
         while !should_exit {
