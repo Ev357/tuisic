@@ -4,6 +4,7 @@ mod providers;
 mod song;
 mod song_list;
 mod tui;
+mod utils;
 
 use app::App;
 use color_eyre::Result;
