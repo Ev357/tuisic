@@ -1,15 +1,13 @@
+use crate::{app_config::providers::local::LocalConfig, providers::Provider, song::Song};
 use color_eyre::Result;
-use std::{fs, sync::Arc};
+use std::fs;
 
-use crate::{config::LocalConfig, providers::Provider, song::Song};
-
-#[derive(Debug)]
 pub struct LocalProvider {
-    config: Arc<LocalConfig>,
+    config: LocalConfig,
 }
 
 impl LocalProvider {
-    pub fn new(config: Arc<LocalConfig>) -> Self {
+    pub fn new(config: LocalConfig) -> Self {
         Self { config }
     }
 }

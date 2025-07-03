@@ -1,16 +1,14 @@
-mod app;
-mod config;
-mod providers;
-mod song;
-mod song_list;
-mod tui;
-mod utils;
-
+use crate::app::AppEvent;
 use app::App;
 use color_eyre::Result;
 use ratatui::{Terminal, prelude::Backend};
 
-use crate::app::AppEvent;
+mod app;
+mod app_config;
+mod providers;
+mod song;
+mod song_list;
+mod tui;
 
 fn main() -> Result<()> {
     color_eyre::install()?;

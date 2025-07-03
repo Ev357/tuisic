@@ -1,8 +1,10 @@
-use crate::utils::get_config_file::get_config_file;
-use std::sync::{Arc, RwLock};
-
+use crate::{
+    app_config::{AppConfig, providers::ProviderConfig},
+    providers::{LocalProvider, Provider},
+    song::Song,
+    song_list::SongList,
+};
 use color_eyre::Result;
-
 use ratatui::{
     Terminal,
     buffer::Buffer,
@@ -11,13 +13,6 @@ use ratatui::{
     prelude::Backend,
     text::Line,
     widgets::{HighlightSpacing, List, ListItem, StatefulWidget, Widget},
-};
-
-use crate::{
-    config::{Config, ProviderConfig},
-    providers::{LocalProvider, Provider},
-    song::Song,
-    song_list::SongList,
 };
 
 pub struct App {
@@ -31,23 +26,15 @@ pub enum AppEvent {
 
 impl App {
     pub fn new() -> Result<Self> {
-        let config = Self::load_config()?;
+        let config = AppConfig::new()?;
 
-        let providers = Self::create_providers(Arc::clone(&config));
+        let providers = Self::create_providers(config);
 
         let songs = Self::load_all_songs(&providers)?;
 
         let song_list = SongList::from_iter(songs);
 
         Ok(Self { song_list })
-    }
-
-    fn load_config() -> Result<Arc<RwLock<Config>>> {
-        let config_file = get_config_file()?;
-
-        let config = Config::from_file(&config_file)?;
-
-        Ok(Arc::new(RwLock::new(config)))
     }
 
     fn load_all_songs(providers: &[Box<dyn Provider>]) -> Result<Vec<Song>> {
@@ -58,15 +45,13 @@ impl App {
             .map(|song_vecs| song_vecs.into_iter().flatten().collect())
     }
 
-    fn create_providers(config: Arc<RwLock<Config>>) -> Vec<Box<dyn Provider>> {
+    fn create_providers(config: AppConfig) -> Vec<Box<dyn Provider>> {
         config
-            .read()
-            .unwrap()
             .providers
-            .iter()
-            .map(|provider| match provider {
-                ProviderConfig::Local { config } => {
-                    Box::new(LocalProvider::new(Arc::clone(config))) as Box<dyn Provider>
+            .into_iter()
+            .map(|provider| -> Box<dyn Provider> {
+                match provider {
+                    ProviderConfig::Local { config } => Box::new(LocalProvider::new(config)),
                 }
             })
             .collect()
