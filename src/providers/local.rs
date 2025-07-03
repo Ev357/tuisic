@@ -16,7 +16,9 @@ impl LocalProvider {
 
 impl Provider for LocalProvider {
     fn get_songs(&self) -> Result<Vec<Song>> {
-        let songs_path = shellexpand::full(&self.config.path).unwrap();
+        let songs_path_config = &self.config.path.to_string_lossy().to_string();
+
+        let songs_path = shellexpand::full(songs_path_config).unwrap();
 
         Ok(fs::read_dir(songs_path.as_ref())?
             .collect::<Result<Vec<_>, _>>()?

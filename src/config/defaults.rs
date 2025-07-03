@@ -20,8 +20,8 @@ impl Defaults {
     pub fn local_config() -> LocalConfigFile {
         let home_path = env::home_dir().unwrap();
 
-        LocalConfigFile {
-            path: format!("{}/Music", home_path.display()),
-        }
+        let path = home_path.join("Music");
+
+        LocalConfigFile { path }
     }
 }

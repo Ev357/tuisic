@@ -1,14 +1,16 @@
+use std::path::PathBuf;
+
 use super::defaults::Defaults;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct LocalConfigFile {
-    pub path: String,
+    pub path: PathBuf,
 }
 
 #[derive(Debug, Clone)]
 pub struct LocalConfig {
-    pub path: String,
+    pub path: PathBuf,
 }
 
 impl From<LocalConfigFile> for LocalConfig {
