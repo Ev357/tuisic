@@ -18,13 +18,10 @@ impl Provider for LocalProvider {
 
         let songs_path = shellexpand::full(songs_path_config).unwrap();
 
-        Ok(fs::read_dir(songs_path.as_ref())?
+        fs::read_dir(songs_path.as_ref())?
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
-            .map(|entry| {
-                let title = entry.file_name().to_string_lossy().to_string();
-                Song { title }
-            })
-            .collect())
+            .map(|entry| Song::new(&entry.path()))
+            .collect()
     }
 }

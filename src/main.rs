@@ -5,13 +5,16 @@ use ratatui::{Terminal, prelude::Backend};
 
 mod app;
 mod app_config;
+mod logging;
 mod providers;
 mod song;
 mod song_list;
 mod tui;
+mod utils;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
+    logging::initialize_logging()?;
     let terminal = tui::init()?;
 
     let result = run(terminal);
