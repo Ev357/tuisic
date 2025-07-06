@@ -1,4 +1,3 @@
-use crate::app::AppEvent;
 use app::App;
 use color_eyre::Result;
 use ratatui::{Terminal, prelude::Backend};
@@ -8,9 +7,9 @@ mod app_config;
 mod logging;
 mod providers;
 mod song;
-mod song_list;
 mod tui;
 mod utils;
+mod view;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -21,22 +20,10 @@ fn main() -> Result<()> {
 
     tui::restore()?;
 
-    match result {
-        Ok(AppEvent::Select { song }) => {
-            println!("Selected: {}", song.title);
-        }
-        Ok(AppEvent::Quit) => {
-            println!("No song selected");
-        }
-        Err(error) => {
-            return Err(error);
-        }
-    }
-
-    Ok(())
+    result
 }
 
-fn run(terminal: Terminal<impl Backend>) -> Result<AppEvent> {
+fn run(terminal: Terminal<impl Backend>) -> Result<()> {
     let app = App::new()?;
 
     app.run(terminal)

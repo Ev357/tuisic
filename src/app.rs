@@ -2,7 +2,10 @@ use crate::{
     app_config::{AppConfig, providers::ProviderConfig},
     providers::{LocalProvider, Provider},
     song::Song,
-    song_list::SongList,
+    view::{
+        View,
+        library::{LibraryView, items::Items},
+    },
 };
 use color_eyre::Result;
 use ratatui::{
@@ -16,12 +19,11 @@ use ratatui::{
 };
 
 pub struct App {
-    song_list: SongList,
+    view: View,
 }
 
 pub enum AppEvent {
     Quit,
-    Select { song: Song },
 }
 
 impl App {
@@ -32,9 +34,13 @@ impl App {
 
         let songs = Self::load_all_songs(&providers)?;
 
-        let song_list = SongList::from_iter(songs);
+        let view = View::Library {
+            view: LibraryView {
+                items: Items::from_iter(songs),
+            },
+        };
 
-        Ok(Self { song_list })
+        Ok(Self { view })
     }
 
     fn load_all_songs(providers: &[Box<dyn Provider>]) -> Result<Vec<Song>> {
@@ -57,24 +63,20 @@ impl App {
             .collect()
     }
 
-    pub fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<AppEvent> {
+    pub fn run(mut self, mut terminal: Terminal<impl Backend>) -> Result<()> {
         let mut should_exit = false;
 
         while !should_exit {
             terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
 
             if let Event::Key(key) = event::read()?
-                && let Some(event) = self.handle_key(key)
+                && let Some(_) = self.handle_key(key)
             {
-                if let AppEvent::Quit = event {
-                    should_exit = true;
-                } else {
-                    return Ok(event);
-                }
+                should_exit = true;
             }
         }
 
-        Ok(AppEvent::Quit)
+        Ok(())
     }
 
     fn handle_key(&mut self, key: KeyEvent) -> Option<AppEvent> {
@@ -82,36 +84,44 @@ impl App {
             return None;
         }
 
-        match key.code {
-            KeyCode::Char('q') | KeyCode::Esc => return Some(AppEvent::Quit),
-            KeyCode::Char('j') | KeyCode::Down => self.song_list.state.select_next(),
-            KeyCode::Char('k') | KeyCode::Up => self.song_list.state.select_previous(),
-            KeyCode::Char('g') | KeyCode::Home => self.song_list.state.select_first(),
-            KeyCode::Char('G') | KeyCode::End => self.song_list.state.select_last(),
-            KeyCode::Char('l') | KeyCode::Right | KeyCode::Enter => {
-                let song = self.song_list.selected_item().unwrap();
-
-                return Some(AppEvent::Select { song });
-            }
-            _ => {}
+        match self.view {
+            View::Library { ref mut view } => match key.code {
+                KeyCode::Char('q') | KeyCode::Esc => return Some(AppEvent::Quit),
+                KeyCode::Char('j') | KeyCode::Down => view.items.state.select_next(),
+                KeyCode::Char('k') | KeyCode::Up => view.items.state.select_previous(),
+                KeyCode::Char('g') | KeyCode::Home => view.items.state.select_first(),
+                KeyCode::Char('G') | KeyCode::End => view.items.state.select_last(),
+                KeyCode::Char('l') | KeyCode::Right | KeyCode::Enter => {
+                    return Some(AppEvent::Quit);
+                }
+                _ => {}
+            },
+            View::Song => {}
+            View::Search => {}
         }
 
         None
     }
 
     fn render_list(&mut self, area: Rect, buf: &mut Buffer) {
-        let items: Vec<ListItem> = self
-            .song_list
-            .songs
-            .iter()
-            .map(|item| ListItem::new(Line::from(format!(" {}", item.title))))
-            .collect();
+        match self.view {
+            View::Library { ref mut view } => {
+                let items: Vec<ListItem> = view
+                    .items
+                    .items
+                    .iter()
+                    .map(|item| ListItem::new(Line::from(format!(" {}", item.title))))
+                    .collect();
 
-        let list = List::new(items)
-            .highlight_symbol(">")
-            .highlight_spacing(HighlightSpacing::Always);
+                let list = List::new(items)
+                    .highlight_symbol(">")
+                    .highlight_spacing(HighlightSpacing::Always);
 
-        StatefulWidget::render(list, area, buf, &mut self.song_list.state);
+                StatefulWidget::render(list, area, buf, &mut view.items.state);
+            }
+            View::Song => {}
+            View::Search => {}
+        }
     }
 }
 
